@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Archive - Archivio fotografico di Andrea Moraschinelli. Blog fotografico con collezione organizzata per date.">
+  <meta name="keywords" content="archivio, fotografie, blog fotografico, portfolio, Andrea Moraschinelli">
+  <meta name="author" content="Andrea Moraschinelli">
+  <title>Archive – Andrea Moraschinelli</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* Archive blog layout */
+    #main-content {
+      margin: 0 auto;
+      padding: 10px 0 40px 0; /* Rimosso padding laterale per header */
+      max-width: 800px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      justify-content: flex-start;
+    }
+    
+    /* Date display al centro della pagina */
+    #current-date {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      font-weight: 400;
+      font-family: Helvetica, sans-serif;
+      color: #666;
+      z-index: 200;
+      padding: 8px 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    /* Contenitore per email e last update */
+    #header-info {
+      position: relative;
+      width: 100%;
+      height: 40px; /* Altezza fissa per il contenitore */
+    }
+    
+    /* Email in alto a sinistra */
+    #email-link {
+      position: absolute;
+      left: 30px; /* 30px dal bordo sinistro */
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      font-weight: 400;
+      font-family: Helvetica, sans-serif;
+      color: #666;
+      text-decoration: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    #email-link:hover {
+      color: #333;
+    }
+    
+    /* Last update in alto a destra */
+    #last-update {
+      position: absolute;
+      right: 30px; /* 30px dal bordo destro */
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      font-weight: 400;
+      font-family: Helvetica, sans-serif;
+      color: #666;
+    }
+    
+    /* Ensure content doesn't overlap with sidebar */
+    body {
+      padding-left: 0;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+
+    
+    .photo-item {
+      margin-bottom: 30px; /* Ridotto da 60px a 30px */
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    
+    .photo-item.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Stili per i pensieri */
+    .thought-item {
+      margin-bottom: 30px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .thought-item.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .thought-content {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #666;
+      font-style: italic;
+      padding: 15px 0 15px 15px;
+      border-left: 2px solid #ccc;
+      text-align: left;
+      white-space: pre-wrap; /* Mantiene i ritorni a capo */
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    /* Dark mode toggle button */
+    .dark-mode-toggle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: none;
+      border: none;
+      font-size: 10px;
+      font-weight: 400;
+      font-family: Helvetica, sans-serif;
+      color: #666;
+      cursor: pointer;
+      padding: 10px;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+    }
+    
+    .dark-mode-toggle:hover {
+      color: #333;
+    }
+    
+    /* Dark mode styles */
+    body.dark-mode {
+      background-color: #000000;
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode #current-date {
+      color: #999;
+    }
+    
+    body.dark-mode #email-link {
+      color: #999;
+    }
+    
+    body.dark-mode #email-link:hover {
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode #last-update {
+      color: #999;
+    }
+    
+    body.dark-mode .dark-mode-toggle {
+      color: #999;
+    }
+    
+    body.dark-mode .dark-mode-toggle:hover {
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode #instagram-link {
+      color: #999;
+    }
+    
+    body.dark-mode #instagram-link:hover {
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode .photo-caption {
+      color: #999;
+    }
+    
+    body.dark-mode .thought-content {
+      color: #ccc;
+      border-left-color: #666;
+    }
+    
+    body.dark-mode .photo-placeholder {
+      background: linear-gradient(45deg, #2a2a2a 25%, transparent 25%), 
+                  linear-gradient(-45deg, #2a2a2a 25%, transparent 25%), 
+                  linear-gradient(45deg, transparent 75%, #2a2a2a 75%), 
+                  linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+    }
+    
+    body.dark-mode .photo-placeholder::before {
+      border-color: #666;
+      border-top-color: #999;
+    }
+    
+    body.dark-mode .loading {
+      color: #999;
+    }
+    
+    .photo-item img {
+      display: block;
+      margin: 0 auto;
+      max-width: 700px;
+      max-height: 700px;
+      width: auto;
+      height: auto;
+      cursor: pointer;
+      border-radius: 2px;
+      object-fit: contain;
+    }
+    
+    .photo-caption {
+      margin: 15px 0 0;
+      font-size: 10px;
+      color: #999;
+      font-style: italic;
+      letter-spacing: 0.5px;
+    }
+    
+    #gallery {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px; /* Ridotto da 20px a 10px */
+      padding: 0 60px; /* Padding solo per le foto, non per l'header */
+    }
+    
+    /* Placeholder system for loading images */
+    .photo-item {
+      position: relative;
+    }
+    
+    .photo-placeholder {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 700px;
+      height: auto; /* Altezza automatica per adattarsi all'immagine */
+      aspect-ratio: 3/4; /* Mantiene proporzioni simili alle foto */
+      background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                  linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                  linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                  linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      filter: blur(8px);
+      opacity: 0.7;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s ease;
+    }
+    
+    .photo-placeholder::before {
+      content: '';
+      width: 40px;
+      height: 40px;
+      border: 3px solid #ddd;
+      border-top: 3px solid #999;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .photo-placeholder.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    /* Blur-up effect for actual images */
+    .blur-up {
+      filter: blur(5px);
+      transform: scale(1.1);
+      transition: filter 0.3s ease, transform 0.3s ease;
+    }
+    
+    .is-loaded {
+      filter: blur(0);
+      transform: scale(1);
+    }
+    
+    .archive-header {
+      display: none; /* Nascondi su desktop */
+    }
+    
+    
+    .archive-header .title {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+    }
+    
+    .archive-header .author {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+    }
+
+    /* Lightbox styles */
+    .lightbox-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.9);
+      z-index: 2000;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .lightbox-overlay.show {
+      opacity: 1;
+    }
+    
+    .lightbox-overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 2px;
+    }
+    
+    /* Loading spinner */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    /* ==================== MOBILE VERSION ==================== */
+    @media (max-width: 1024px) {
+      
+      /* Body che si sposta come una camera */
+      body {
+        overflow-x: hidden;
+        transition: transform 0.3s ease;
+      }
+      
+      /* Nascondi completamente l'header su mobile */
+      .archive-header {
+        display: none !important;
+      }
+      
+      #main-content {
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+        width: 100%;
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      /* Date dinamiche per ogni mese - nel flusso della pagina */
+      .month-date {
+        background: transparent;
+        font-size: 28px;
+        font-weight: bold;
+        color: black;
+        z-index: 1;
+        padding: 20px 0;
+        text-align: center;
+        border: none;
+        box-shadow: none;
+        mix-blend-mode: multiply;
+        pointer-events: none;
+        white-space: nowrap;
+        margin: 0 auto;
+        width: 100%;
+      }
+      
+      /* Data display uguale a desktop - centrato nella pagina */
+      #current-date {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;
+        font-weight: 400;
+        font-family: Helvetica, sans-serif;
+        color: #666;
+        z-index: 200;
+        padding: 8px 0;
+        transition: opacity 0.3s ease;
+        text-align: center;
+        white-space: nowrap;
+      }
+      
+      /* Mobile mantiene lo stesso stile desktop */
+      
+      /* Nascondi scrollbar */
+      body {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      
+      body::-webkit-scrollbar {
+        display: none;
+      }
+      
+      /* Hide POLAROID su mobile */
+      #current-polaroid {
+        display: none !important;
+      }
+      
+      /* Gallery padding su mobile */
+      #gallery {
+        padding: 0 10px;
+      }
+      
+      /* Nascondi email e mostra Instagram su mobile */
+      #email-link {
+        display: none;
+      }
+      
+      #instagram-link {
+        position: absolute;
+        left: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        text-decoration: none;
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      
+      #instagram-link:hover {
+        color: #000;
+        text-decoration: underline;
+      }
+      
+      /* Photos Instagram-style */
+      .photo-item {
+        margin: 0 0 5px 0;
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .photo-item img {
+        width: 100%;
+        height: auto;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 0;
+      }
+      
+      /* Foto orizzontali più grandi su mobile */
+      .photo-item img[style*="aspect-ratio: 4/3"],
+      .photo-item img[style*="aspect-ratio: 16/9"],
+      .photo-item img[style*="aspect-ratio: 3/2"] {
+        max-height: 100vh;
+        width: 100%;
+        height: 100vh;
+      }
+      
+      /* Mobile placeholder */
+      .photo-placeholder {
+        height: auto;
+        max-height: 90vh;
+        max-width: 100%;
+        left: 0;
+        transform: none;
+        width: 100%;
+        aspect-ratio: 3/4; /* Mantiene proporzioni simili alle foto */
+      }
+      
+      /* Placeholder per foto orizzontali più grandi su mobile */
+      .photo-placeholder[style*="aspect-ratio: 4/3"],
+      .photo-placeholder[style*="aspect-ratio: 16/9"],
+      .photo-placeholder[style*="aspect-ratio: 3/2"] {
+        max-height: 100vh;
+        height: 100vh;
+      }
+      
+      /* Caption mobile - più vicina alla foto */
+      .photo-caption {
+        margin: 0;
+        padding: 8px 0 8px 0;
+        font-size: 12px;
+        color: #666;
+        text-align: left;
+      }
+      
+      /* Pensieri mobile - margini ridotti */
+      .thought-item {
+        margin: 0 0 5px 0;
+        max-width: 100%;
+      }
+      
+      .thought-content {
+        padding: 10px 0 10px 15px;
+        font-size: 11px;
+        max-width: 100%;
+      }
+      
+    }
+    
+  </style>
+</head>
+<body>
+    
+    
+  <!-- Date display al centro -->
+  <div id="current-date">Archivio Fotografico</div>
+  
+  <!-- Header info con email e last update - FUORI dal main-content -->
+        <div id="header-info">
+          <a href="mailto:andreamoraschinelli27@gmail.com" id="email-link">andreamoraschinelli27@gmail.com</a>
+          <a href="https://instagram.com/morraflow" id="instagram-link" target="_blank">@morraflow</a>
+          <div id="last-update">last update: 17/09/2025</div>
+          <button id="dark-mode-toggle" class="dark-mode-toggle">SFONDO</button>
+        </div>
+  
+  <!-- Main content area -->
+  <main id="main-content">
+    <header class="archive-header">
+      <h1 class="title">ARCHIVE</h1>
+      <span class="author">Andrea Moraschinelli</span>
+    </header>
+    <div id="gallery"></div>
+    <div id="loading" class="loading">Caricamento foto...</div>
+  </main>
+  
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox-overlay">
+    <img src="" alt="Foto ingrandita">
+  </div>
+  
+  <script>
+    // Array che verranno caricati automaticamente dal JSON
+    let photos = [];
+    let thoughts = [];
+    
+    // Funzione per caricare le foto dal file JSON
+    async function loadPhotosFromJSON() {
+      const loadingEl = document.getElementById('loading');
+      async function tryFetch(url, options) {
+        const res = await fetch(url, options);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      }
+      try {
+        // Primo tentativo: con cache-busting
+        const data = await tryFetch(`photo-index.json?ts=${Date.now()}`, { cache: 'no-store' });
+        photos = data.photos || [];
+        thoughts = data.thoughts || [];
+        console.log(`✅ Caricate ${photos.length} foto e ${thoughts.length} pensieri dall'archivio (no-store)`);
+      } catch (e1) {
+        console.warn(`⚠️ Fetch con cache-busting fallito (${e1.message}). Riprovo senza query...`);
+        try {
+          // Secondo tentativo: senza query string
+          const data2 = await tryFetch('photo-index.json', { cache: 'no-cache' });
+          photos = data2.photos || [];
+          thoughts = data2.thoughts || [];
+          console.log(`✅ Caricate ${photos.length} foto e ${thoughts.length} pensieri dall'archivio (fallback)`);
+        } catch (e2) {
+          console.error('❌ Impossibile caricare photo-index.json:', e2);
+          loadingEl.textContent = 'Errore: impossibile caricare l\'archivio (photo-index.json)';
+          photos = [];
+          thoughts = [];
+        }
+      }
+    }
+
+    let loadedCount = 0;
+    const batchSize = 6; // Aumentato per caricare più foto inizialmente
+    const gallery = document.getElementById('gallery');
+    const loading = document.getElementById('loading');
+    const currentDateDisplay = document.getElementById('current-date');
+    
+    // Combina foto e pensieri in un array unificato
+    function combineContent() {
+      const allContent = [];
+      
+      // Crea una mappa dei pensieri per nome base del file
+      const thoughtsMap = new Map();
+      thoughts.forEach(thought => {
+        const filename = thought.src.split('/').pop().replace('.txt', '').replace('.md', '');
+        // Rimuovi numeri dal nome per il matching
+        const baseName = filename.replace(/^\d+-/, '').replace(/ \d+$/, '');
+        thoughtsMap.set(baseName, thought);
+      });
+      
+      // Aggiungi foto e i loro pensieri associati
+      photos.forEach(photo => {
+        // Aggiungi la foto
+        allContent.push({...photo, type: 'photo'});
+        
+        // Cerca un pensiero associato
+        const filename = photo.src.split('/').pop().replace('.jpg', '').replace('.jpeg', '').replace('.png', '');
+        const baseName = filename.replace(/^\d+-/, '').replace(/ \d+$/, '');
+        const associatedThought = thoughtsMap.get(baseName);
+        
+        if (associatedThought) {
+          allContent.push({...associatedThought, type: 'thought'});
+          // Rimuovi il pensiero dalla mappa per evitare duplicati
+          thoughtsMap.delete(baseName);
+        }
+      });
+      
+      // Aggiungi eventuali pensieri rimasti (senza foto associate)
+      thoughtsMap.forEach(thought => {
+        allContent.push({...thought, type: 'thought'});
+      });
+      
+      return allContent;
+    }
+    
+    // Funzione per caricare batch di contenuto (foto + pensieri)
+    function loadPhotos() {
+      const allContent = combineContent();
+      const slice = allContent.slice(loadedCount, loadedCount + batchSize);
+      console.log(`📷 Caricando contenuto ${loadedCount + 1}-${loadedCount + slice.length} di ${allContent.length}`);
+      
+      const gallery = document.getElementById('gallery');
+      console.log(`🎯 Gallery element:`, gallery);
+      
+      // Processa ogni elemento (foto o pensiero)
+      slice.forEach(item => {
+        if (item.type === 'photo') {
+          // Gestisci foto
+          const photoItem = document.createElement('div');
+          photoItem.className = 'photo-item';
+          photoItem.setAttribute('data-folder', item.folder);
+          console.log(`🔧 Creando elemento foto per: ${item.src}`);
+          
+          // Crea placeholder immediatamente
+          const placeholder = document.createElement('div');
+          placeholder.className = 'photo-placeholder';
+          
+          const img = document.createElement('img');
+          img.decoding = 'async';
+          img.loading = 'lazy';
+          img.alt = `Foto da ${item.folder}`;
+          
+          // Debug per ogni immagine
+          img.onerror = (e) => {
+            console.error(`❌ ERRORE caricamento: ${item.src}`, e);
+            console.error(`❌ URL completo: ${window.location.origin}/${item.src}`);
+            placeholder.classList.add('hidden');
+          };
+          img.onload = () => {
+            // Calcola le dimensioni reali dell'immagine e applica al placeholder
+            const imgWidth = img.naturalWidth;
+            const imgHeight = img.naturalHeight;
+            const aspectRatio = imgWidth / imgHeight;
+            
+            // Applica le dimensioni reali al placeholder
+            placeholder.style.aspectRatio = aspectRatio;
+            placeholder.style.height = 'auto';
+            
+            // Nascondi placeholder e mostra immagine
+            placeholder.classList.add('hidden');
+            img.classList.add('is-loaded');
+            photoItem.classList.add('loaded');
+            console.log(`✅ OK caricata: ${item.src} (${imgWidth}x${imgHeight})`);
+          };
+          
+          const caption = document.createElement('div');
+          caption.className = 'photo-caption';
+          // Rimuovi numeri dal titolo (sia formato "01-nome" che "nome 2")
+          let filename = item.src.split('/').pop().replace('.jpg', '');
+          filename = filename.replace(/^\d+-/, ''); // Rimuovi "01-" dall'inizio
+          filename = filename.replace(/ \d+$/, ''); // Rimuovi " 2" dalla fine
+          caption.textContent = filename;
+          
+          // Aggiungi elementi nell'ordine corretto
+          photoItem.appendChild(placeholder);
+          photoItem.appendChild(img);
+          photoItem.appendChild(caption);
+          gallery.appendChild(photoItem);
+          
+          // Mostra subito l'item con placeholder
+          photoItem.classList.add('loaded');
+          
+          // Inizia il caricamento dell'immagine
+          img.src = item.src;
+          
+          // Osserva per aggiornamento data
+          dateObserver.observe(photoItem);
+          
+          // Click per lightbox
+          img.addEventListener('click', () => openLightbox(img));
+          
+        } else if (item.type === 'thought') {
+          // Gestisci pensiero
+          const thoughtItem = document.createElement('div');
+          thoughtItem.className = 'thought-item';
+          thoughtItem.setAttribute('data-folder', item.folder);
+          console.log(`💭 Creando elemento pensiero per: ${item.src}`);
+          
+          const thoughtContent = document.createElement('div');
+          thoughtContent.className = 'thought-content';
+          thoughtContent.textContent = item.content;
+          
+          thoughtItem.appendChild(thoughtContent);
+          gallery.appendChild(thoughtItem);
+          
+          // Mostra subito il pensiero
+          thoughtItem.classList.add('loaded');
+          
+          // Osserva per aggiornamento data
+          dateObserver.observe(thoughtItem);
+        }
+      });
+      
+      loadedCount += slice.length;
+      
+      if (loadedCount >= combineContent().length) {
+        loading.textContent = 'Fine dell\'archivio';
+        infiniteScrollObserver.disconnect();
+      }
+    }
+
+    // Lazy loading observer (ora non più necessario con caricamento immediato)
+    const lazyLoadObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          const src = img.dataset.src;
+          if (src && !img.src) {
+            console.log(`🖼️ Caricando immagine lazy: ${src}`);
+            img.src = src;
+            lazyLoadObserver.unobserve(img);
+
+            img.onerror = () => {
+              console.error(`❌ Errore caricamento: ${src}`);
+              // Nascondi placeholder in caso di errore
+              const placeholder = img.parentElement.querySelector('.photo-placeholder');
+              if (placeholder) placeholder.classList.add('hidden');
+            };
+            img.onload = () => {
+              img.classList.add('is-loaded');
+              // Nascondi placeholder quando l'immagine è caricata
+              const placeholder = img.parentElement.querySelector('.photo-placeholder');
+              if (placeholder) placeholder.classList.add('hidden');
+              console.log(`✅ Immagine caricata: ${src}`);
+            };
+          }
+        }
+      });
+    }, { rootMargin: '100px' });
+
+    // Date observer - aggiorna data e POLAROID quando foto entra nel centro dello schermo
+    const dateObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const folder = entry.target.dataset.folder;
+          currentDateDisplay.textContent = folder;
+          
+        }
+      });
+    }, { 
+      rootMargin: '-40% 0px -40% 0px', // Trigger quando foto è al centro
+      threshold: 0.1 
+    });
+
+    // Infinite scroll observer
+    const infiniteScrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && loadedCount < combineContent().length) {
+          loadPhotos();
+        }
+      });
+    });
+
+    // Lightbox functionality
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = lightbox.querySelector('img');
+
+    function openLightbox(img) {
+      lightboxImg.src = img.src;
+      lightbox.style.display = 'flex';
+      setTimeout(() => lightbox.classList.add('show'), 10);
+    }
+
+    lightbox.addEventListener('click', () => {
+      lightbox.classList.remove('show');
+      setTimeout(() => {
+        lightbox.style.display = 'none';
+        lightboxImg.src = '';
+      }, 300);
+    });
+
+    // Dark mode functionality
+    function initDarkMode() {
+      const toggle = document.getElementById('dark-mode-toggle');
+      const body = document.body;
+      
+      // Carica preferenza salvata
+      const savedMode = localStorage.getItem('darkMode');
+      if (savedMode === 'true') {
+        body.classList.add('dark-mode');
+        toggle.textContent = 'SFONDO';
+      }
+      
+      // Toggle dark mode
+      toggle.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        const isDark = body.classList.contains('dark-mode');
+        toggle.textContent = 'SFONDO';
+        localStorage.setItem('darkMode', isDark);
+      });
+    }
+    
+    // Inizializza
+    async function initializeGallery() {
+      await loadPhotosFromJSON();
+      const allContent = combineContent();
+      console.log(`🎯 Inizializzazione: caricate ${photos.length} foto e ${thoughts.length} pensieri dal JSON`);
+      if (!allContent || allContent.length === 0) {
+        loading.textContent = 'Nessun contenuto trovato nell\'archivio.';
+        return;
+      }
+      loadPhotos();
+      infiniteScrollObserver.observe(loading);
+    }
+    
+    // Inizializza tutto
+    initDarkMode();
+    initializeGallery();
+    
+    
+    
+  </script>
+</body>
+</html>

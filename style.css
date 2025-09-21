@@ -1,0 +1,202 @@
+html, body {
+  font-family: Helvetica, sans-serif;
+  font-size: 12px;
+}
+
+.menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    color: black;
+}
+
+
+.menu a {
+  text-decoration: none;
+  color: black;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: center; 
+    width: 100%; 
+    margin: 0 auto;
+    margin-bottom: 20px; /* space between projects */
+    position: relative;
+}
+
+.project-info {
+    flex: 2;
+    min-width: 30%;
+    margin-right: 20px; /* spazio tra i due box */
+    position: relative;
+}
+
+.box-2 {
+  flex: 3;
+  display: flex;
+  min-width: 70%;
+  align-items: flex-start;
+  justify-content: center;
+  /* border: 2px solid red; */
+}
+
+
+/* Override and enforce fixed 3:4 container spanning 50%–95% of viewport width */
+
+
+.immagine img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Slideshow styles */
+.slideshow {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.slideshow .slides {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+.slideshow .slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+.slideshow .slide.active {
+  opacity: 1;
+}
+
+/* Centered, styled slideshow arrows */
+.slideshow .prev,
+.slideshow .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  font-size: 1.5rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.slideshow .prev {
+  left: 5px;
+}
+
+.slideshow .next {
+  right: 5px;
+}
+
+
+/* Image container flows in flex row without overlapping */
+.immagine,
+.immagine.slideshow {
+  position: static;
+  width: 55%;            /* increased from 40% to 60% for larger images */
+  aspect-ratio: 3 / 4;
+  overflow: visible;
+}
+
+.slideshow .next {
+  right: 5px;
+  position: absolute;
+}
+
+.slideshow .prev {
+  right: 5px;
+  position: absolute;
+}
+
+#bea img {
+  bottom: 0px;
+}
+
+/* Descrizioni sempre visibili - controllate da JavaScript */
+
+/* Stili specifici per la pagina about */
+.container .content {
+  margin-left: 280px; /* Staccato dalla sidebar */
+  padding-right: 20px; /* Piccolo margine a destra */
+}
+
+.text {
+  width: 100%; /* Estende fino alla fine della pagina */
+  padding-top: 0;
+}
+
+.text p:first-child {
+  margin-top: 16px;
+}
+
+#ref {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+
+
+
+/* Project gallery nel project-info */
+.project-gallery {
+  display: grid;
+  grid-template-columns: 2fr 8fr;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.project-gallery img {
+  height: 180px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+/* Variante compatta per gallery secondarie di progetti specifici */
+.project-gallery.compact {
+  display: grid;
+  grid-template-columns: 1fr; /* una colonna, più righe */
+  gap: 6px;
+}
+
+.project-gallery.compact img {
+  height: 160px; /* più grandi */
+}
+
+/* Mostra solo 3 righe (prime 3 immagini) nella variante compatta */
+.project-gallery.compact img:nth-child(n+4) {
+  display: none;
+}
+
+/* Blur-up loading effect for archive images */
+.photo-item img {
+  transition: filter 0.4s ease, opacity 0.3s ease, transform 0.4s ease;
+  backface-visibility: hidden;
+}
+
+.photo-item img.blur-up {
+  filter: blur(20px);
+  transform: scale(1.02);
+  opacity: 0.6;
+}
+
+.photo-item img.is-loaded {
+  filter: blur(0);
+  transform: none;
+  opacity: 1;
+}

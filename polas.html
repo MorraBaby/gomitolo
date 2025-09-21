@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Polas - Collezione di fotografie Polaroid di Andrea Moraschinelli">
+  <meta name="keywords" content="polaroid, fotografie istantanee, polas, portfolio, Andrea Moraschinelli">
+  <meta name="author" content="Andrea Moraschinelli">
+  <title>Polas – Andrea Moraschinelli</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Reset completo per parete di Polaroid */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      overflow: hidden; /* Disabilita scroll nativo */
+      background: #000;
+      height: 100vh;
+      width: 100vw;
+    }
+    
+    /* Nasconde scrollbar su tutti i browser */
+    body::-webkit-scrollbar,
+    #main-content::-webkit-scrollbar {
+      display: none;
+    }
+    
+    body {
+      -ms-overflow-style: none;  /* Internet Explorer 10+ */
+      scrollbar-width: none;  /* Firefox */
+    }
+    
+    .sidebar {
+      position: absolute;
+      top: calc(50vh + 20px);
+      left: calc(50vw + 350px);
+      width: 250px;
+      z-index: 1000;
+      background: transparent;
+      padding: 20px;
+    }
+
+    .sidebar p {
+      font-size: 12px;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .sidebar p a {
+      text-decoration: none;
+      color: white;
+    }
+
+    .menu ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      color: white;
+    }
+
+    .menu a {
+      text-decoration: none;
+      color: white;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .menu a::after {
+      content: '';
+      position: absolute;
+      bottom: 1px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background-color: currentColor;
+      transition: width 0.3s ease;
+    }
+
+    .menu a:hover::after {
+      width: 100%;
+    }
+    
+    /* Main content molto compatto per densità massima */
+    #main-content {
+      width: 250vw; /* Area molto piccola */
+      height: 200vh; /* Area molto piccola */
+      background: #000;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: transform 0.1s ease-out;
+      will-change: transform;
+    }
+    
+    /* Layout sparso senza grid - parete organica */
+    .polas-grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      padding: 5px;
+    }
+    
+    /* Polaroid posizionate assolutamente - disposizione sparsa */
+    .polaroid-item {
+      position: absolute;
+      cursor: pointer;
+      max-width: 350px;
+      z-index: 1;
+      will-change: transform;
+    }
+    
+    /* Parallax layers */
+    .parallax-near {
+      opacity: 0.9;
+      z-index: 1;
+    }
+    
+    .parallax-mid {
+      opacity: 1;
+      z-index: 2;
+    }
+    
+    .parallax-far {
+      opacity: 0.95;
+      z-index: 3;
+    }
+    
+    .polaroid-item:hover {
+      z-index: 10;
+    }
+    
+    .polaroid-item img {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      transition: filter 0.4s ease, opacity 0.35s ease, transform 0.4s ease;
+    }
+    /* Blur-up effect while loading */
+    .polaroid-item img.blur-up {
+      filter: blur(18px);
+      transform: scale(1.02);
+      opacity: 0.65;
+    }
+    .polaroid-item img.is-loaded {
+      filter: blur(0);
+      transform: none;
+      opacity: 1;
+    }
+    
+    .polaroid-item img:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Evidenziazione foto centrale */
+    .center-highlight {
+      z-index: 15 !important;
+      transform: scale(1.08) !important;
+      transition: all 0.5s ease !important;
+    }
+    
+    /* Effetti atmosferici */
+    .depth-near {
+      filter: blur(0px) brightness(1.1) contrast(1.1);
+      z-index: 5;
+    }
+    
+    .depth-mid {
+      filter: blur(0px) brightness(1) contrast(1);
+      z-index: 3;
+    }
+    
+    .depth-far {
+      filter: blur(1px) brightness(0.8) contrast(0.9);
+      z-index: 1;
+    }
+    
+    /* Vignetting overlay */
+    .atmospheric-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 20%,
+        rgba(0,0,0,0.1) 70%,
+        rgba(0,0,0,0.3) 100%
+      );
+      opacity: 0.6;
+      transition: opacity 0.5s ease;
+    }
+    
+    /* Ambient lighting zones */
+    .lighting-warm {
+      filter: sepia(10%) saturate(110%) hue-rotate(5deg);
+    }
+    
+    .lighting-cool {
+      filter: sepia(5%) saturate(90%) hue-rotate(-10deg);
+    }
+    
+    .lighting-neutral {
+      filter: none;
+    }
+    
+    /* Lightbox per ingrandimento */
+    .lightbox-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.9);
+      z-index: 2000;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .lightbox-overlay.show {
+      opacity: 1;
+    }
+    
+    .lightbox-overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 2px;
+    }
+
+    /* Loading state */
+    .loading {
+      text-align: center;
+      padding: 60px;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    /* Navigation overlay minimale */
+    .nav-overlay {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 2000;
+      background: rgba(0,0,0,0.8);
+      padding: 5px 10px;
+      border-radius: 2px;
+    }
+    
+    .nav-overlay a {
+      color: white;
+      text-decoration: none;
+      font-size: 10px;
+      margin-right: 10px;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+    
+    .nav-overlay a:hover {
+      color: #ccc;
+    }
+    
+    /* Loading nascosto */
+    .loading {
+      display: none;
+    }
+    
+    /* Scroll indicator per esplorabilità */
+    .scroll-hint {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    
+    /* Responsive - layout sparso */
+    @media (max-width: 1200px) {
+      #main-content {
+        width: 350vw;
+        min-height: 250vh;
+      }
+      
+      .polaroid-item {
+        max-width: 300px;
+      }
+      
+      .polaroid-item img {
+        max-height: 350px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      #main-content {
+        width: 300vw;
+        min-height: 200vh;
+      }
+      
+      .polaroid-item {
+        max-width: 250px;
+      }
+      
+      .polaroid-item img {
+        max-height: 300px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      #main-content {
+        width: 250vw;
+        min-height: 180vh;
+      }
+      
+      .polaroid-item {
+        max-width: 200px;
+      }
+      
+      .polaroid-item img {
+        max-height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation overlay -->
+  <div class="nav-overlay">
+    <a href="index.html">WORK</a>
+    <a href="archive.html">ARCHIVE</a>
+    <a href="about.html">ABOUT</a>
+  </div>
+  
+  <!-- Main content area -->
+  <main id="main-content">
+    <aside class="sidebar">
+      <p id="ref">Andrea Moraschinelli<br>
+      <a href="about.html">about</a><br>
+      <a href="https://www.instagram.com/andreamoraschinelli/" target="_blank">instagram</a></p>
+      <nav class="menu">
+        <ul>
+          <li><a href="index.html">WORK</a></li>
+          <li><a href="archive.html">ARCHIVE</a></li>
+          <li><a href="polas.html">POLAS</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <div id="polas-gallery" class="polas-grid"></div>
+  </main>
+  
+  <!-- Effetti atmosferici -->
+  <div class="atmospheric-overlay"></div>
+  
+  <!-- Scroll hint -->
+  <div class="scroll-hint">Esplora • Ctrl+Scroll = Zoom • +/- = Zoom • 0 = Reset</div>
+  
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox-overlay">
+    <img src="" alt="Polaroid ingrandita">
+  </div>
+  
+  <script>
+    // Array aggiornato con tutti i nuovi JPG leggeri
+    const polaroids = [
+      'src/POLAROID/2020-02-29-0001.jpg',
+      'src/POLAROID/2020-02-29-0007.jpg',
+      'src/POLAROID/POLAROID1.jpg',
+      'src/POLAROID/POLAROID3.jpg',
+      'src/POLAROID/POLAROID4.jpg',
+      'src/POLAROID/POLAROID5.jpg',
+      'src/POLAROID/POLAROID5-2.jpg',
+      'src/POLAROID/POLAROID6.jpg',
+      'src/POLAROID/POLAROID10.jpg',
+      'src/POLAROID/POLAROID12.jpg',
+      'src/POLAROID/Scansione 1.jpg',
+      'src/POLAROID/Scansione 2.jpg',
+      'src/POLAROID/Scansione 2 2.jpg',
+      'src/POLAROID/Scansione 2 2 2.jpg',
+      'src/POLAROID/Scansione 2 2 2 2.jpg',
+      'src/POLAROID/Scansione 2 3.jpg',
+      'src/POLAROID/Scansione 2 copia.jpg',
+      'src/POLAROID/Scansione 2 copia 2.jpg',
+      'src/POLAROID/Scansione 2 copia 3.jpg',
+      'src/POLAROID/Scansione 3.jpg',
+      'src/POLAROID/Scansione 3 2.jpg',
+      'src/POLAROID/Scansione 3 3.jpg',
+      'src/POLAROID/Scansione 3 4.jpg',
+      'src/POLAROID/Scansione 3 copia.jpg',
+      'src/POLAROID/Scansione 3 copia 2.jpg',
+      'src/POLAROID/Scansione 3 copia 3.jpg',
+      'src/POLAROID/Scansione 4.jpg',
+      'src/POLAROID/Scansione 4 2.jpg',
+      'src/POLAROID/Scansione 4 3.jpg',
+      'src/POLAROID/Scansione 4 4.jpg',
+      'src/POLAROID/Scansione 4 copia.jpg',
+      'src/POLAROID/Scansione 4 copia 2.jpg',
+      'src/POLAROID/Scansione 4 copia 3.jpg'
+    ];
+
+    const gallery = document.getElementById('polas-gallery');
+    const loading = document.getElementById('loading');
+    
+    // Funzione per riempire area enorme con Polaroid
+    function loadPolaroids() {
+      if (polaroids.length === 0) return;
+      
+      // Area totale da riempire - compattissima per massima densità
+      const totalWidth = window.innerWidth * 2.5; // 250vw
+      const totalHeight = window.innerHeight * 2; // 200vh
+      
+      // Numero totale di Polaroid da distribuire - densità massima
+      const totalPolaroids = 300; // Densità massima con margini minimi
+      
+      // Shuffle delle Polaroid
+      const shuffledPolaroids = [...polaroids].sort(() => Math.random() - 0.5);
+      
+      // Array per tracciare aree occupate
+      const occupiedAreas = [];
+      let placedPolaroids = 0;
+      
+      // Funzione per trovare posizione libera
+      function findFreePosition(imgWidth, imgHeight) {
+        const maxAttempts = 100;
+        const margin = 1; // Margine ultra-minimo tra immagini
+        
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          const x = Math.random() * (totalWidth - imgWidth - 20);
+          const y = Math.random() * (totalHeight - imgHeight - 20);
+          
+          // Controlla sovrapposizioni con margine
+          const hasOverlap = occupiedAreas.some(area => 
+            x < area.right + margin && 
+            x + imgWidth + margin > area.left &&
+            y < area.bottom + margin && 
+            y + imgHeight + margin > area.top
+          );
+          
+          if (!hasOverlap) {
+            return { x, y };
+          }
+        }
+        
+        // Se non trova posizione, forza una posizione casuale
+        return {
+          x: Math.random() * (totalWidth - imgWidth - 20),
+          y: Math.random() * (totalHeight - imgHeight - 20)
+        };
+      }
+      
+      // Caricamento batch per performance migliori
+      const batchSize = 20; // Batch ottimizzati per JPG leggeri
+      let currentBatch = 0;
+      
+      function loadBatch() {
+        const startIndex = currentBatch * batchSize;
+        const endIndex = Math.min(startIndex + batchSize, totalPolaroids);
+        const batch = shuffledPolaroids.slice(startIndex, endIndex);
+        
+        console.log(`📸 Caricando batch ${currentBatch + 1}: foto ${startIndex + 1}-${endIndex}`);
+        
+        batch.forEach((src, batchIndex) => {
+          const item = document.createElement('div');
+          item.className = 'polaroid-item';
+          
+          // Assegna layer parallax casuale
+          const parallaxLayers = ['parallax-near', 'parallax-mid', 'parallax-far'];
+          const randomLayer = parallaxLayers[Math.floor(Math.random() * parallaxLayers.length)];
+          item.classList.add(randomLayer);
+          
+          // Assegna effetti atmosferici casuali
+          const depthLayers = ['depth-near', 'depth-mid', 'depth-far'];
+          const randomDepth = depthLayers[Math.floor(Math.random() * depthLayers.length)];
+          item.classList.add(randomDepth);
+          
+          const lightingModes = ['lighting-warm', 'lighting-cool', 'lighting-neutral'];
+          const randomLighting = lightingModes[Math.floor(Math.random() * lightingModes.length)];
+          item.classList.add(randomLighting);
+          
+          const img = document.createElement('img');
+          // Blur-up during load
+          img.classList.add('blur-up');
+          img.decoding = 'async';
+          img.loading = 'lazy';
+          img.src = src;
+          img.alt = '';
+          
+          // Usa dimensioni stimate ridotte per maggiore densità
+          const estimatedWidth = 250;
+          const estimatedHeight = 280;
+          
+          // Trova posizione subito con dimensioni stimate
+          const position = findFreePosition(estimatedWidth, estimatedHeight);
+          const rotation = (Math.random() - 0.5) * 6;
+          
+          item.style.left = position.x + 'px';
+          item.style.top = position.y + 'px';
+          item.style.transform = `rotate(${rotation}deg)`;
+          item.style.opacity = '0';
+          
+          // Registra area stimata subito
+          occupiedAreas.push({
+            left: position.x,
+            right: position.x + estimatedWidth,
+            top: position.y,
+            bottom: position.y + estimatedHeight
+          });
+          
+          // Mostra con fade quando caricata + rimuovi blur
+          img.onload = () => {
+            img.classList.remove('blur-up');
+            img.classList.add('is-loaded');
+            item.style.opacity = '1';
+            item.style.transition = 'opacity 0.3s ease';
+            placedPolaroids++;
+            // Aggiorna highlight dopo il caricamento
+            if (placedPolaroids % 10 === 0) { // Aggiorna ogni 10 foto caricate
+              setTimeout(updateCenterHighlight, 100);
+            }
+          };
+          
+          item.appendChild(img);
+          gallery.appendChild(item);
+          
+          // Click per lightbox
+          img.addEventListener('click', () => openLightbox(img));
+        });
+        
+        currentBatch++;
+        
+        // Carica prossimo batch dopo breve pausa
+        if (currentBatch * batchSize < totalPolaroids) {
+          setTimeout(loadBatch, 50); // 50ms tra batch
+        } else {
+          console.log(`✅ Caricamento completato: ${totalPolaroids} Polaroid`);
+        }
+      }
+      
+      // Inizia caricamento batch
+      loadBatch();
+      
+      console.log(`🚀 Iniziato caricamento di ${totalPolaroids} Polaroid con collision detection`);
+      
+      // Posiziona inizialmente al centro dell'area
+      currentX = (totalWidth - window.innerWidth) / 2;
+      currentY = (totalHeight - window.innerHeight) / 2;
+      updateTransform();
+      
+      // Nascondi scroll hint dopo qualche secondo
+      setTimeout(() => {
+        const hint = document.querySelector('.scroll-hint');
+        if (hint) hint.style.opacity = '0';
+      }, 4000);
+    }
+
+    // Lightbox functionality
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = lightbox.querySelector('img');
+
+    function openLightbox(img) {
+      lightboxImg.src = img.src;
+      lightbox.style.display = 'flex';
+      setTimeout(() => lightbox.classList.add('show'), 10);
+    }
+
+    lightbox.addEventListener('click', () => {
+      lightbox.classList.remove('show');
+      setTimeout(() => {
+        lightbox.style.display = 'none';
+        lightboxImg.src = '';
+      }, 300);
+    });
+
+    // Sistema di scrolling con zoom dinamico e momentum
+    let currentX = window.innerWidth * 0.5; // Centro orizzontale perfetto
+    let currentY = window.innerHeight * 0.5; // Centro verticale perfetto
+    let currentZoom = 1;
+    const minZoom = 0.3;
+    const maxZoom = 2.5;
+    
+    // Momentum scrolling
+    let velocityX = 0;
+    let velocityY = 0;
+    let isScrolling = false;
+    let lastScrollTime = 0;
+    const friction = 0.95;
+    const minVelocity = 0.1;
+    
+    // Funzione per calcolare limiti elastici
+    function applyElasticBoundaries() {
+      const totalWidth = window.innerWidth * 2.5;
+      const totalHeight = window.innerHeight * 2;
+      const maxX = totalWidth * currentZoom - window.innerWidth;
+      const maxY = totalHeight * currentZoom - window.innerHeight;
+      
+      // Elastic boundaries - permette di andare oltre ma con resistenza
+      const elasticMargin = 100;
+      
+      if (currentX < -elasticMargin) {
+        currentX += ((-elasticMargin) - currentX) * 0.1;
+      } else if (currentX > maxX + elasticMargin) {
+        currentX += ((maxX + elasticMargin) - currentX) * 0.1;
+      }
+      
+      if (currentY < -elasticMargin) {
+        currentY += ((-elasticMargin) - currentY) * 0.1;
+      } else if (currentY > maxY + elasticMargin) {
+        currentY += ((maxY + elasticMargin) - currentY) * 0.1;
+      }
+      
+      // Snap back ai limiti normali se dentro il range valido
+      if (currentX < 0 && currentX > -elasticMargin) currentX = Math.max(0, currentX);
+      if (currentX > maxX && currentX < maxX + elasticMargin) currentX = Math.min(maxX, currentX);
+      if (currentY < 0 && currentY > -elasticMargin) currentY = Math.max(0, currentY);
+      if (currentY > maxY && currentY < maxY + elasticMargin) currentY = Math.min(maxY, currentY);
+    }
+    
+    function updateTransform() {
+      const mainContent = document.getElementById('main-content');
+      mainContent.style.transform = `translate(${-currentX}px, ${-currentY}px) scale(${currentZoom})`;
+      mainContent.style.transformOrigin = '0 0';
+    }
+    
+    // Momentum scrolling loop
+    function momentumLoop() {
+      if (Math.abs(velocityX) > minVelocity || Math.abs(velocityY) > minVelocity) {
+        currentX += velocityX;
+        currentY += velocityY;
+        
+        applyElasticBoundaries();
+        
+        velocityX *= friction;
+        velocityY *= friction;
+        
+        updateTransform();
+        requestAnimationFrame(momentumLoop);
+      } else {
+        velocityX = 0;
+        velocityY = 0;
+        isScrolling = false;
+      }
+    }
+    
+    // Gestione wheel event per laptop
+    document.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      
+      // Zoom con Ctrl/Cmd + rotella
+      if (e.ctrlKey || e.metaKey) {
+        const zoomSpeed = 0.002;
+        const deltaZoom = -e.deltaY * zoomSpeed;
+        
+        const oldZoom = currentZoom;
+        currentZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom + deltaZoom));
+        
+        // Calcola il punto centrale del viewport nel mondo
+        const viewportCenterX = window.innerWidth / 2;
+        const viewportCenterY = window.innerHeight / 2;
+        
+        // Punto del mondo che è attualmente al centro del viewport
+        const worldCenterX = (currentX + viewportCenterX) / oldZoom;
+        const worldCenterY = (currentY + viewportCenterY) / oldZoom;
+        
+        // Riposiziona per mantenere lo stesso punto al centro del viewport
+        currentX = worldCenterX * currentZoom - viewportCenterX;
+        currentY = worldCenterY * currentZoom - viewportCenterY;
+        
+        // Limiti dell'area
+        const totalWidth = window.innerWidth * 2.5;
+        const totalHeight = window.innerHeight * 2;
+        const maxX = totalWidth * currentZoom - window.innerWidth;
+        const maxY = totalHeight * currentZoom - window.innerHeight;
+        
+        currentX = Math.max(0, Math.min(maxX, currentX));
+        currentY = Math.max(0, Math.min(maxY, currentY));
+        
+      } else {
+        // Scroll normale con momentum (velocità ridotta)
+        const speed = 0.8;
+        const deltaX = e.deltaX * speed;
+        const deltaY = e.deltaY * speed;
+        
+        // Calcola velocità basata sul tempo
+        const currentTime = Date.now();
+        const timeDelta = currentTime - lastScrollTime;
+        lastScrollTime = currentTime;
+        
+        // Aggiungi momentum (ridotto)
+        if (timeDelta < 50) { // Solo se scroll rapido
+          velocityX += deltaX * 0.08;
+          velocityY += deltaY * 0.08;
+        }
+        
+        currentX += deltaX;
+        currentY += deltaY;
+        
+        applyElasticBoundaries();
+        
+        // Avvia momentum se non già attivo
+        if (!isScrolling && (Math.abs(velocityX) > minVelocity || Math.abs(velocityY) > minVelocity)) {
+          isScrolling = true;
+          requestAnimationFrame(momentumLoop);
+        }
+      }
+      
+      updateTransform();
+    }, { passive: false });
+    
+    
+    // Gestione tastiera per navigazione e zoom
+    document.addEventListener('keydown', (e) => {
+      const step = 30; // Ridotto per coerenza con scroll
+      const totalWidth = window.innerWidth * 2.5;
+      const totalHeight = window.innerHeight * 2;
+      const maxX = totalWidth - window.innerWidth;
+      const maxY = totalHeight - window.innerHeight;
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          currentX = Math.max(0, currentX - step);
+          updateTransform();
+          e.preventDefault();
+          break;
+        case 'ArrowRight':
+          currentX = Math.min(maxX, currentX + step);
+          updateTransform();
+          e.preventDefault();
+          break;
+        case 'ArrowUp':
+          currentY = Math.max(0, currentY - step);
+          updateTransform();
+          e.preventDefault();
+          break;
+        case 'ArrowDown':
+          currentY = Math.min(maxY, currentY + step);
+          updateTransform();
+          e.preventDefault();
+          break;
+        case '=':
+        case '+':
+          // Zoom in centrato su viewport
+          if (currentZoom < maxZoom) {
+            const oldZoom = currentZoom;
+            currentZoom = Math.min(maxZoom, currentZoom * 1.2);
+            
+            const viewportCenterX = window.innerWidth / 2;
+            const viewportCenterY = window.innerHeight / 2;
+            
+            const worldCenterX = (currentX + viewportCenterX) / oldZoom;
+            const worldCenterY = (currentY + viewportCenterY) / oldZoom;
+            
+            currentX = worldCenterX * currentZoom - viewportCenterX;
+            currentY = worldCenterY * currentZoom - viewportCenterY;
+            
+            const totalWidth = window.innerWidth * 2.5;
+            const totalHeight = window.innerHeight * 2;
+            const maxX = totalWidth * currentZoom - window.innerWidth;
+            const maxY = totalHeight * currentZoom - window.innerHeight;
+            
+            currentX = Math.max(0, Math.min(maxX, currentX));
+            currentY = Math.max(0, Math.min(maxY, currentY));
+            
+            updateTransform();
+          }
+          e.preventDefault();
+          break;
+        case '-':
+          // Zoom out centrato su viewport
+          if (currentZoom > minZoom) {
+            const oldZoom = currentZoom;
+            currentZoom = Math.max(minZoom, currentZoom / 1.2);
+            
+            const viewportCenterX = window.innerWidth / 2;
+            const viewportCenterY = window.innerHeight / 2;
+            
+            const worldCenterX = (currentX + viewportCenterX) / oldZoom;
+            const worldCenterY = (currentY + viewportCenterY) / oldZoom;
+            
+            currentX = worldCenterX * currentZoom - viewportCenterX;
+            currentY = worldCenterY * currentZoom - viewportCenterY;
+            
+            const totalWidth = window.innerWidth * 2.5;
+            const totalHeight = window.innerHeight * 2;
+            const maxX = totalWidth * currentZoom - window.innerWidth;
+            const maxY = totalHeight * currentZoom - window.innerHeight;
+            
+            currentX = Math.max(0, Math.min(maxX, currentX));
+            currentY = Math.max(0, Math.min(maxY, currentY));
+            
+            updateTransform();
+          }
+          e.preventDefault();
+          break;
+        case '0':
+          // Reset zoom e posizione
+          currentZoom = 1;
+          currentX = 0;
+          currentY = 0;
+          updateTransform();
+          e.preventDefault();
+          break;
+      }
+    });
+    
+    // Sistema di evidenziazione foto centrale
+    function updateCenterHighlight() {
+      const allPolaroids = document.querySelectorAll('.polaroid-item img');
+      const viewportCenterX = window.innerWidth / 2;
+      const viewportCenterY = window.innerHeight / 2;
+      
+      let closestPhoto = null;
+      let minDistance = Infinity;
+      
+      allPolaroids.forEach(img => {
+        const rect = img.getBoundingClientRect();
+        const photoCenterX = rect.left + rect.width / 2;
+        const photoCenterY = rect.top + rect.height / 2;
+        
+        // Calcola distanza dal centro del viewport
+        const distance = Math.sqrt(
+          Math.pow(photoCenterX - viewportCenterX, 2) + 
+          Math.pow(photoCenterY - viewportCenterY, 2)
+        );
+        
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestPhoto = img;
+        }
+      });
+      
+      // Rimuovi highlight precedente
+      allPolaroids.forEach(img => {
+        img.classList.remove('center-highlight');
+      });
+      
+      // Aggiungi highlight alla foto più centrale
+      if (closestPhoto && minDistance < 300) { // Solo se abbastanza vicina al centro
+        closestPhoto.classList.add('center-highlight');
+      }
+    }
+    
+    // Funzione parallax leggero
+    function updateParallax() {
+      const nearItems = document.querySelectorAll('.parallax-near');
+      const midItems = document.querySelectorAll('.parallax-mid');
+      const farItems = document.querySelectorAll('.parallax-far');
+      
+      if (nearItems.length === 0 && midItems.length === 0 && farItems.length === 0) {
+        return; // Non ci sono ancora elementi caricati
+      }
+      
+      nearItems.forEach(item => {
+        // Layer vicino: si muove nella stessa direzione ma più lentamente
+        const offsetX = currentX * 0.05;
+        const offsetY = currentY * 0.05;
+        item.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      });
+      
+      midItems.forEach(item => {
+        // Layer medio: movimento normale
+        item.style.transform = `translate(0px, 0px)`;
+      });
+      
+      farItems.forEach(item => {
+        // Layer lontano: si muove in direzione opposta
+        const offsetX = -currentX * 0.08;
+        const offsetY = -currentY * 0.08;
+        item.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      });
+    }
+    
+    // Aggiorna highlight, parallax e atmosfera quando si muove o zooma
+    function updateTransformWithHighlight() {
+      // Applica il transform
+      const mainContent = document.getElementById('main-content');
+      mainContent.style.transform = `translate(${-currentX}px, ${-currentY}px) scale(${currentZoom})`;
+      mainContent.style.transformOrigin = '0 0';
+      
+      // Aggiorna parallax
+      updateParallax();
+      
+      // Aggiorna effetti atmosferici
+      updateAtmosphericEffects();
+      
+      // Aggiorna highlight
+      requestAnimationFrame(updateCenterHighlight);
+    }
+    
+    // Sostituisci updateTransform con la nuova versione
+    updateTransform = updateTransformWithHighlight;
+    
+    // Centra il viewport all'apertura
+    updateTransform();
+    
+    // Aggiorna anche durante il resize
+    window.addEventListener('resize', updateCenterHighlight);
+    
+    
+    // Sistema di effetti atmosferici
+    function updateAtmosphericEffects() {
+      updateVignetting();
+      updateAmbientLighting();
+    }
+    
+    function updateVignetting() {
+      const overlay = document.querySelector('.atmospheric-overlay');
+      const totalWidth = window.innerWidth * 2.5;
+      const totalHeight = window.innerHeight * 2;
+      
+      // Calcola distanza dal centro
+      const centerX = totalWidth / 2;
+      const centerY = totalHeight / 2;
+      const distanceFromCenter = Math.sqrt(
+        Math.pow(currentX - centerX, 2) + Math.pow(currentY - centerY, 2)
+      );
+      
+      // Aumenta vignetting in base alla distanza dal centro
+      const maxDistance = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
+      const vignettingIntensity = Math.min(0.8, (distanceFromCenter / maxDistance) * 0.6);
+      
+      overlay.style.opacity = vignettingIntensity;
+      
+      // Sposta il centro del vignetting in base al movimento
+      const gradientCenterX = 50 - (currentX / totalWidth) * 20;
+      const gradientCenterY = 50 - (currentY / totalHeight) * 20;
+      
+      overlay.style.background = `radial-gradient(
+        ellipse at ${gradientCenterX}% ${gradientCenterY}%,
+        transparent 20%,
+        rgba(0,0,0,${vignettingIntensity * 0.2}) 70%,
+        rgba(0,0,0,${vignettingIntensity * 0.5}) 100%
+      )`;
+    }
+    
+    function updateAmbientLighting() {
+      const totalWidth = window.innerWidth * 2.5;
+      const totalHeight = window.innerHeight * 2;
+      
+      // Dividi lo spazio in zone con lighting diverso
+      const zoneX = currentX / totalWidth;
+      const zoneY = currentY / totalHeight;
+      
+      const mainContent = document.getElementById('main-content');
+      
+      // Rimuovi tutte le classi di lighting precedenti
+      mainContent.classList.remove('lighting-warm', 'lighting-cool', 'lighting-neutral');
+      
+      // Assegna lighting basato sulla posizione
+      if (zoneX < 0.3 && zoneY < 0.3) {
+        // Nord-Ovest: lighting freddo
+        mainContent.classList.add('lighting-cool');
+      } else if (zoneX > 0.7 && zoneY < 0.3) {
+        // Nord-Est: lighting caldo
+        mainContent.classList.add('lighting-warm');
+      } else if (zoneX < 0.3 && zoneY > 0.7) {
+        // Sud-Ovest: lighting caldo
+        mainContent.classList.add('lighting-warm');
+      } else if (zoneX > 0.7 && zoneY > 0.7) {
+        // Sud-Est: lighting freddo
+        mainContent.classList.add('lighting-cool');
+      } else {
+        // Centro: lighting neutro
+        mainContent.classList.add('lighting-neutral');
+      }
+    }
+    
+    // Inizializza la galleria direttamente
+    loadPolaroids();
+    
+    // Attiva effetti dopo un breve delay per permettere il caricamento iniziale
+    setTimeout(() => {
+      updateCenterHighlight();
+      updateAtmosphericEffects();
+      // Aggiorna periodicamente durante l'esplorazione
+      setInterval(() => {
+        updateCenterHighlight();
+        updateAtmosphericEffects();
+      }, 500);
+    }, 2000);
+  </script>
+</body>
+</html>
