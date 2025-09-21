@@ -21,3 +21,4 @@ Sito indipendente per l'archivio fotografico di Andrea Moraschinelli.
 ## Deploy
 
 Questo sito può essere deployato su Netlify o qualsiasi altro servizio di hosting statico.
+# GitHub Pages Test
