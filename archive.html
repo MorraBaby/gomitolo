@@ -44,22 +44,28 @@
       height: 40px; /* Altezza fissa per il contenitore */
     }
     
-    /* Email in alto a sinistra */
+    /* Email nascosta su desktop */
     #email-link {
+      display: none;
+    }
+    
+    /* Instagram in alto a sinistra - stessa posizione della mail */
+    #instagram-link {
       position: absolute;
       left: 30px; /* 30px dal bordo sinistro */
       top: 50%;
       transform: translateY(-50%);
       font-size: 10px;
-      font-weight: 400;
+      font-weight: 500;
       font-family: Helvetica, sans-serif;
       color: #666;
       text-decoration: none;
       transition: opacity 0.3s ease;
     }
     
-    #email-link:hover {
+    #instagram-link:hover {
       color: #333;
+      text-decoration: underline;
     }
     
     /* Last update in alto a destra */
@@ -162,11 +168,11 @@
       color: #999;
     }
     
-    body.dark-mode #email-link {
+    body.dark-mode #instagram-link {
       color: #999;
     }
     
-    body.dark-mode #email-link:hover {
+    body.dark-mode #instagram-link:hover {
       color: #e0e0e0;
     }
     
@@ -441,27 +447,7 @@
         padding: 0 10px;
       }
       
-      /* Nascondi email e mostra Instagram su mobile */
-      #email-link {
-        display: none;
-      }
-      
-      #instagram-link {
-        position: absolute;
-        left: 30px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #666;
-        text-decoration: none;
-        display: block;
-        font-size: 12px;
-        font-weight: 500;
-      }
-      
-      #instagram-link:hover {
-        color: #000;
-        text-decoration: underline;
-      }
+      /* Instagram già configurato nel CSS desktop */
       
       /* Photos Instagram-style */
       .photo-item {
