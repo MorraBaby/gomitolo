@@ -5,10 +5,6 @@
       "folder": "2025 SETTEMBRE"
     },
     {
-      "src": "src/archivio/2025/9 - SETTEMBRE/00003 Isola, Milano.jpg",
-      "folder": "2025 SETTEMBRE"
-    },
-    {
       "src": "src/archivio/2025/9 - SETTEMBRE/00004 Section80, Farini, Milano.jpg",
       "folder": "2025 SETTEMBRE"
     },
@@ -17,7 +13,11 @@
       "folder": "2025 SETTEMBRE"
     },
     {
-      "src": "src/archivio/2025/8 - AGOSTO/00001 Casa di Nicole, Costanza, Germania.jpg",
+      "src": "src/archivio/2025/9 - SETTEMBRE/00003 Isola, Milano.jpg",
+      "folder": "2025 SETTEMBRE"
+    },
+    {
+      "src": "src/archivio/2025/8 - AGOSTO/00004 Costanza, Germania.jpg",
       "folder": "2025 AGOSTO"
     },
     {
@@ -25,7 +25,7 @@
       "folder": "2025 AGOSTO"
     },
     {
-      "src": "src/archivio/2025/8 - AGOSTO/00004 Costanza, Germania.jpg",
+      "src": "src/archivio/2025/8 - AGOSTO/00001 Casa di Nicole, Costanza, Germania.jpg",
       "folder": "2025 AGOSTO"
     },
     {
@@ -37,7 +37,7 @@
       "folder": "2025 AGOSTO"
     },
     {
-      "src": "src/archivio/2025/7 - LUGLIO/00010 Quartiere Nolo, Milano.jpg",
+      "src": "src/archivio/2025/7 - LUGLIO/00005 Casa di Tobia, Parallel, Barcellona.jpg",
       "folder": "2025 LUGLIO"
     },
     {
@@ -45,7 +45,11 @@
       "folder": "2025 LUGLIO"
     },
     {
-      "src": "src/archivio/2025/7 - LUGLIO/00003 Barceloneta, Barcellona.jpg",
+      "src": "src/archivio/2025/7 - LUGLIO/00010 Quartiere Nolo, Milano.jpg",
+      "folder": "2025 LUGLIO"
+    },
+    {
+      "src": "src/archivio/2025/7 - LUGLIO/00009 Porta Venezia, Milano.jpg",
       "folder": "2025 LUGLIO"
     },
     {
@@ -53,11 +57,7 @@
       "folder": "2025 LUGLIO"
     },
     {
-      "src": "src/archivio/2025/7 - LUGLIO/00005 Casa di Tobia, Parallel, Barcellona.jpg",
-      "folder": "2025 LUGLIO"
-    },
-    {
-      "src": "src/archivio/2025/7 - LUGLIO/00009 Porta Venezia, Milano.jpg",
+      "src": "src/archivio/2025/7 - LUGLIO/00003 Barceloneta, Barcellona.jpg",
       "folder": "2025 LUGLIO"
     },
     {
@@ -69,11 +69,11 @@
       "folder": "2025 LUGLIO"
     },
     {
-      "src": "src/archivio/2025/7 - LUGLIO/00002 Barceloneta, Barcellona 3.jpg",
+      "src": "src/archivio/2025/7 - LUGLIO/00008 Porta Venezia, Milano 3.jpg",
       "folder": "2025 LUGLIO"
     },
     {
-      "src": "src/archivio/2025/7 - LUGLIO/00008 Porta Venezia, Milano 3.jpg",
+      "src": "src/archivio/2025/7 - LUGLIO/00002 Barceloneta, Barcellona 3.jpg",
       "folder": "2025 LUGLIO"
     }
   ],
